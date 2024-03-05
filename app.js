@@ -3,9 +3,9 @@ require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const mongoose = require("mongoose");
 const cors = require('cors');
+
 const app = express();
 const port = 3000;
-const authRoute = require('./routes/AuthRoute');
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -25,7 +25,10 @@ app.use((req, res, next) => {
 app.use(cors());
 
 //routes
+const authRoute = require('./routes/AuthRoute');
 app.use(authRoute);
+const adminRoute = require('./routes/AdminRoute');
+app.use(adminRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
