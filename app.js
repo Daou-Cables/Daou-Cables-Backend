@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const cors = require('cors');
 const app = express();
 const port = 3000;
+const authRoute = require('./routes/AuthRoute');
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 app.use(cors());
 
 //routes
+app.use(authRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
