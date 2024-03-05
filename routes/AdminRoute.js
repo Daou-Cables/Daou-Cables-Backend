@@ -7,5 +7,7 @@ const { requireAuth, requireLevelOne } = require('../middleware/Middleware');
 router.post('/addAdmin', requireAuth, requireLevelOne, adminController.addAdmin_post);
 router.post('/deleteAdmin', requireAuth, requireLevelOne, adminController.deleteAdmin_post);
 
+router.get('/getAdmins', requireAuth, requireLevelOne, adminController.getAdmins_get);
+
 module.exports = router;
 

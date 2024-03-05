@@ -1,4 +1,5 @@
 const Admin = require('../models/Admin');
+const Contact = require('../models/Contact');
 
 module.exports.addAdmin_post = async (req, res) => {
     const { email, password, first_name, last_name } = req.body;
@@ -29,6 +30,23 @@ module.exports.deleteAdmin_post = async (req, res) => {
         }
         else{
             res.status(404).json({message: 'Admin not found!'});
+        }
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+
+module.exports.getAdmins_get = async (req, res) => {
+    try{
+        const admins = await Admin.find({ level: 2 });
+        if(admins.length === 0){
+            res.status(404).json({message: 'No Admins found!'});
+            return;
+        }
+        else{
+            res.status(200).json(admins);
         }
     }
     catch(err){

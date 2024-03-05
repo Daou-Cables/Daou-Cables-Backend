@@ -14,17 +14,17 @@ const contactSchema = new mongoose.Schema({
     fax: [{
         type: String
     }],
-    instagram: [{
-        type: String
-    }],
-    wechat: {
+    instagram: {
         type: String
     },
+    wechat: [{
+        type: String
+    }],
     facebook: {
         type: String
     }
 });
 
-const Category = mongoose.model('Contact', categorySchema);
+const Contact = mongoose.model('Contact', contactSchema);
 
 module.exports = Contact;
