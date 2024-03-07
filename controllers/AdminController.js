@@ -1,3 +1,5 @@
+const { s3Client } = require('../config/s3Client');
+const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const Admin = require('../models/Admin');
 const Contact = require('../models/Contact');
 const Product = require('../models/Product');
@@ -79,13 +81,24 @@ module.exports.getAdmins_get = async (req, res) => {
 };
 
 module.exports.addProduct_post = async (req, res) => {
-    const { name, description, picture, ref } = req.body;
     try{
-        const product = new Product({ name, description, picture, ref});
+        const { name, description, ref } = req.body;
+        const picture = req.files.picture[0].originalname;
+        const file = req.files.picture[0].buffer;
+        const params = {
+            Bucket: process.env.BUCKET,
+            Key: picture,
+            Body: file,
+            ACL: 'public-read'
+        };
+        const data = await s3Client.send(new PutObjectCommand(params));
+        const pictureUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
+        console.log(data);
+        const product = new Product({ name, description, picture: pictureUrl, ref});
         await product.save();
         res.status(201).json(product);
     }
     catch(err){
-        res.status(500).json({message: 'Server Error!'});
+        res.status(500).json({message: 'Server Error!', err:err});
     }
 };

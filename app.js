@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -29,6 +29,8 @@ const authRoute = require('./routes/AuthRoute');
 app.use(authRoute);
 const adminRoute = require('./routes/AdminRoute');
 app.use(adminRoute);
+const mainRoute = require('./routes/MainRoute');
+app.use(mainRoute);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
