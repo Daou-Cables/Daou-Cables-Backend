@@ -16,6 +16,10 @@ const quotaSchema = new mongoose.Schema({
     description:{
         type: String
     },
+    read:{
+        type: Boolean,
+        default: false
+    }
 });
 
 const Quota = mongoose.model('Quota', quotaSchema);
