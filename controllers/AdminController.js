@@ -38,6 +38,29 @@ module.exports.deleteAdmin_post = async (req, res) => {
     }
 };
 
+module.exports.editContact_post = async (req, res) => {
+    const { email, phone, address, fax, instagram, wechat, facebook } = req.body;
+    try{
+        const contact = await Contact.findOne();
+        if(contact){
+            contact.email = email;
+            contact.phone = phone;
+            contact.address = address;
+            contact.fax = fax;
+            contact.instagram = instagram;
+            contact.wechat = wechat;
+            contact.facebook = facebook;
+            await contact.save();
+            res.status(200).json(contact);
+        }
+        else{
+            res.status(404).json({message: 'Contact not found!'});
+        }
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
 
 module.exports.getAdmins_get = async (req, res) => {
     try{
