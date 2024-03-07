@@ -30,7 +30,7 @@ module.exports.login_post = async (req, res) => {
                 access_token: accessToken
             });
             await ARtoken.save();
-            res.status(200).json({admin: admin, accessToken}).cookie('refreshToken', refreshToken, {
+            res.cookie('refreshToken', refreshToken, {
                 httpOnly: true,
                 secure: true,
                 sameSite: 'strict',
@@ -38,18 +38,20 @@ module.exports.login_post = async (req, res) => {
                 //domain: '.daoucablefactory.com',
                 path: '/api/auth/refreshToken'
             });
+            return res.status(200).json({admin: admin, accessToken});
         }
         else{
-            res.status(400).json({message: 'Invalid email or password'});
+            return res.status(400).json({message: 'Invalid email or password'});
         }
     }
     catch (err) {
         console.log(err);
-        res.status(500).json({message: 'Server Error'});
+        return res.status(500).json({message: 'Server Error'});
     }
 };
 
 module.exports.refreshToken_post = async (req, res) => {
+    console.log(req);
     const refreshToken = req.cookies.refreshToken;
     const currentTime = Math.floor(Date.now() / 1000);
     if (refreshToken) {
@@ -67,7 +69,7 @@ module.exports.refreshToken_post = async (req, res) => {
                     });
                     await ARToken.save();
                     await Token.deleteOne({ refresh_token: refreshToken });
-                    res.status(200).json({admin: ARToken.admin, accessToken: new_accessToken}).cookie('refreshToken', new_refreshToken, {
+                    res.cookie('refreshToken', new_refreshToken, {
                         httpOnly: true,
                         secure: true,
                         sameSite: 'strict',
@@ -75,20 +77,27 @@ module.exports.refreshToken_post = async (req, res) => {
                         //domain: '.daoucablefactory.com',
                         path: '/api/auth/refreshToken'
                     });
+                    return res.status(200).json({admin: ARToken.admin, accessToken: new_accessToken});
                 }
                 else {
-                    res.status(401).json({message: 'Refresh Token Expired'});
+                    return res.status(401).json({message: 'Refresh Token Expired'});
                 }
             }
             else {
-                res.status(404).json({message: 'Token Not Found'});
+                return res.status(404).json({message: 'Token Not Found'});
             }
         }
         catch (err) {
-            res.status(500).json({message: 'Server Error'});
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({message: 'Refresh Token Expired'});
+            }
+            else {
+                return res.status(500).json({message: 'Server Error'});
+            }
+                
         }
     }
     else{
-        res.status(403).json({message: 'Token Not Received'});
+        return res.status(403).json({message: 'Token Not Received'});
     }
 };
