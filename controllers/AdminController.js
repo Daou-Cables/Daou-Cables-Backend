@@ -79,9 +79,9 @@ module.exports.getAdmins_get = async (req, res) => {
 };
 
 module.exports.addProduct_post = async (req, res) => {
-    const { name, description, picture } = req.body;
+    const { name, description, picture, ref } = req.body;
     try{
-        const product = new Product({ name, description, picture });
+        const product = new Product({ name, description, picture, ref});
         await product.save();
         res.status(201).json(product);
     }

@@ -6,8 +6,7 @@ const { requireAuth, requireLevelOne } = require('../middleware/Middleware');
 //Level 1 admin routes
 router.post('/addAdmin', requireAuth, requireLevelOne, adminController.addAdmin_post);
 router.post('/deleteAdmin', requireAuth, requireLevelOne, adminController.deleteAdmin_post);
-//router.post('/editContact', requireAuth, requireLevelOne, adminController.editContact_post);
-//router.post('/editAdmin', requireAuth, requireLevelOne, adminController.editAdmin_post);
+router.post('/editContact', requireAuth, requireLevelOne, adminController.editContact_post);
 
 router.get('/getAdmins', requireAuth, requireLevelOne, adminController.getAdmins_get);
 
