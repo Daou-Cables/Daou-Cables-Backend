@@ -9,5 +9,8 @@ router.post('/deleteAdmin', requireAuth, requireLevelOne, adminController.delete
 
 router.get('/getAdmins', requireAuth, requireLevelOne, adminController.getAdmins_get);
 
+//Level 2 admin routes
+router.post('/addProduct', requireAuth, adminController.addProduct_post);
+
 module.exports = router;
 

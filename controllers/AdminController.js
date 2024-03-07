@@ -1,5 +1,6 @@
 const Admin = require('../models/Admin');
 const Contact = require('../models/Contact');
+const Product = require('../models/Product');
 
 module.exports.addAdmin_post = async (req, res) => {
     const { email, password, first_name, last_name } = req.body;
@@ -48,6 +49,18 @@ module.exports.getAdmins_get = async (req, res) => {
         else{
             res.status(200).json(admins);
         }
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.addProduct_post = async (req, res) => {
+    const { name, description, picture } = req.body;
+    try{
+        const product = new Product({ name, description, picture });
+        await product.save();
+        res.status(201).json(product);
     }
     catch(err){
         res.status(500).json({message: 'Server Error!'});
