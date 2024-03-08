@@ -3,7 +3,7 @@ const Contact = require('../models/Contact');
 const Media = require('../models/Media');
 const Product = require('../models/Product');
 
- module.exports.getProducts_get = async (req, res) => {
+module.exports.getProducts_get = async (req, res) => {
     try{
         const products = await Product.find();
         res.status(200).json(products);
@@ -55,10 +55,20 @@ module.exports.getProduct_get = async (req, res) => {
     }
 };
 
-module.exports.getMedia_get = async (req, res) => {
+module.exports.getBillboard_get = async (req, res) => {
     try{
         const media = await Media.findOne();
-        res.status(200).json(media);
+        res.status(200).json(media.billboard);
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.getVideo_get = async (req, res) => {
+    try{
+        const media = await Media.findOne();
+        res.status(200).json(media.video);
     }
     catch(err){
         res.status(500).json({message: 'Server Error!'});
