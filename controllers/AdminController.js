@@ -4,6 +4,7 @@ const Admin = require('../models/Admin');
 const Contact = require('../models/Contact');
 const Media = require('../models/Media');
 const Product = require('../models/Product');
+const bcrypt = require('bcrypt');
 
 module.exports.addAdmin_post = async (req, res) => {
     const { email, password, first_name, last_name } = req.body;
@@ -103,20 +104,49 @@ module.exports.changeBillboard_post = async (req, res) => {
     }
 };
 
-module.exports.addProduct_post = async (req, res) => {
+module.exports.changeVideo_post = async (req, res) => {
     try{
-        const { name, description, ref } = req.body;
-        const picture = req.files.picture[0].originalname;
-        const file = req.files.picture[0].buffer;
+        const video = req.files.video[0].originalname;
+        const file = req.files.video[0].buffer;
         const params = {
             Bucket: process.env.BUCKET,
-            Key: picture,
+            Key: video,
             Body: file,
             ACL: 'public-read'
         };
         const data = await s3Client.send(new PutObjectCommand(params));
+        const videoUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
+        const media = await Media.findOne();
+        media.video = videoUrl;
+        await media.save();
+        res.status(200).json(media.video);
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.addProduct_post = async (req, res) => {
+    try{
+        const { name, description, ref } = req.body;
+        const picture = req.files.picture[0].originalname;
+        const type = req.files.picture[0].mimetype;
+        const file = req.files.picture[0].buffer;
+        if(type !== 'image/jpeg' && type !== 'image/png'){
+            res.status(400).json({message: 'Invalid file type!'});
+            return;
+        }
+        const date = new Date();
+        const newFileName = bcrypt.hashSync(picture + date.toISOString(), 10);
+        const params = {
+            Bucket: process.env.BUCKET,
+            Key: newFileName,
+            Body: file,
+            ACL: 'public-read',
+            ContentType: type
+        };
+        const data = await s3Client.send(new PutObjectCommand(params));
         const pictureUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
-        console.log(data);
         const product = new Product({ name, description, picture: pictureUrl, ref});
         await product.save();
         res.status(201).json(product);
