@@ -20,6 +20,11 @@ router.post('/addProduct', requireAuth, upload.fields([
     {name:'ref',maxCount:1},
     {name:'description',maxCount:1}]), adminController.addProduct_post);
 router.post('/deleteProduct', requireAuth, adminController.deleteProduct_post);
+router.post('/editProduct', requireAuth, upload.fields([
+    {name: 'picture', maxCount: 1 },
+    {name: 'name', maxCount:1},
+    {name:'ref',maxCount:1},
+    {name:'description',maxCount:1}]), adminController.editProduct_post);
 
 module.exports = router;
 

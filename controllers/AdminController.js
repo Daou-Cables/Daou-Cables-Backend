@@ -190,8 +190,8 @@ module.exports.addProduct_post = async (req, res) => {
 };
 
 module.exports.deleteProduct_post = async (req, res) => {
-    const { ref } = req.body;
     try{
+        const { ref } = req.body;
         const product = await Product.findOne({ ref });
         if(product){
             const pictureUrl = new URL(product.picture);
@@ -203,6 +203,54 @@ module.exports.deleteProduct_post = async (req, res) => {
             await s3Client.send(new DeleteObjectCommand(deleteParams));
             await product.deleteOne();
             res.status(200).json({message: 'Product deleted!'});
+        }
+        else{
+            res.status(404).json({message: 'Product not found!'});
+        }
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.editProduct_post = async (req, res) => {
+    try{
+        const { ref } = req.body;
+        const product = await Product.findOne({ ref }); 
+        if(product){
+            if(product.picture){
+                const oldPictureUrl = new URL(product.picture);
+                const oldPictureKey = decodeURIComponent(oldPictureUrl.pathname.substring(1));
+                const deleteParams = {
+                    Bucket: process.env.BUCKET,
+                    Key: oldPictureKey,
+                };
+                await s3Client.send(new DeleteObjectCommand(deleteParams));
+            }
+            const picture = req.files.picture[0].originalname;
+            const type = req.files.picture[0].mimetype;
+            const file = req.files.picture[0].buffer;
+            if(type !== 'image/jpeg' && type !== 'image/png'){
+                res.status(400).json({message: 'Invalid file type!'});
+                return;
+            }
+            const date = new Date();
+            const newFileName = bcrypt.hashSync(picture + date.toISOString(), 10);
+            const params = {
+                Bucket: process.env.BUCKET,
+                Key: newFileName,
+                Body: file,
+                ACL: 'public-read',
+                ContentType: type
+            };
+            const data = await s3Client.send(new PutObjectCommand(params));
+            const pictureUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
+            product.name = req.body.name;
+            product.description = req.body.description;
+            product.ref = req.body.ref;
+            product.picture = pictureUrl;
+            await product.save();
+            res.status(200).json(product);
         }
         else{
             res.status(404).json({message: 'Product not found!'});
