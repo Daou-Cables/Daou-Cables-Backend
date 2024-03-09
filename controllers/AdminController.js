@@ -84,8 +84,9 @@ module.exports.getAdmins_get = async (req, res) => {
 
 module.exports.changeBillboard_post = async (req, res) => {
     try {
-        const picture = req.files.picture[0].originalname;
-        const file = req.files.picture[0].buffer;
+        const picture = req.file.originalname;
+        const file = req.file.buffer;
+        const type = req.file.mimetype;
         const media = await Media.findOne();
         if (media && media.billboard) {
             const oldPictureUrl = new URL(media.billboard);
@@ -96,11 +97,18 @@ module.exports.changeBillboard_post = async (req, res) => {
             };
             await s3Client.send(new DeleteObjectCommand(deleteParams));
         }
+        if(type !== 'image/jpeg' && type !== 'image/png'){
+            res.status(400).json({message: 'Invalid file type!'});
+            return;
+        }
+        const date = new Date();
+        const newFileName = bcrypt.hashSync(picture + date.toISOString(), 10);
         const uploadParams = {
             Bucket: process.env.BUCKET,
-            Key: picture,
+            Key: newFileName,
             Body: file,
-            ACL: 'public-read'
+            ACL: 'public-read',
+            ContentType: type
         };
         await s3Client.send(new PutObjectCommand(uploadParams));
         const pictureUrl = `https://${uploadParams.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(uploadParams.Key)}`;
@@ -108,14 +116,15 @@ module.exports.changeBillboard_post = async (req, res) => {
         await media.save();
         res.status(200).json(media.billboard);
     } catch (err) {
-        res.status(500).json({ message: 'Server Error!' });
+        res.status(500).json({ message: 'Server Error! wennn', err: err });
     }
 };
 
 module.exports.changeVideo_post = async (req, res) => {
     try{
-        const video = req.files.video[0].originalname;
-        const file = req.files.video[0].buffer;
+        const video = req.file.originalname;
+        const file = req.file.buffer;
+        const type = req.file.mimetype;
         const media = await Media.findOne();
         if(media && media.video){
             const oldVideoUrl = new URL(media.video);
@@ -126,11 +135,18 @@ module.exports.changeVideo_post = async (req, res) => {
             };
             await s3Client.send(new DeleteObjectCommand(deleteParams));
         }
+        if(type !== 'video/mp4'){
+            res.status(400).json({message: 'Invalid file type!'});
+            return;
+        }
+        const date = new Date();
+        const newFileName = bcrypt.hashSync(video + date.toISOString(), 10);
         const params = {
             Bucket: process.env.BUCKET,
-            Key: video,
+            Key: newFileName,
             Body: file,
-            ACL: 'public-read'
+            ACL: 'public-read',
+            ContentType: type
         };
         await s3Client.send(new PutObjectCommand(params));
         const videoUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
