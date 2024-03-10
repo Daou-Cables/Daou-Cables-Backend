@@ -2,6 +2,7 @@ const Category = require('../models/Category');
 const Contact = require('../models/Contact');
 const Media = require('../models/Media');
 const Product = require('../models/Product');
+const Quota = require('../models/Quota');
 
 module.exports.getProducts_get = async (req, res) => {
     try{
@@ -76,13 +77,14 @@ module.exports.getVideo_get = async (req, res) => {
 };
 
 module.exports.addQuota_post = async (req, res) => {
-    const { name, email, phone, description } = req.body;
-    try{
-        const contact = new Contact({ name, email, phone, description });
-        await contact.save();
-        res.status(201).json(contact);
+    try{    
+        const { name, email, phone, description } = req.body;
+        const quota = new Quota({ name, email, phone, description });
+        await quota.save();
+        res.status(201).json(quota);
     }
     catch(err){
-        res.status(500).json({message: 'Server Error!'});
+        console.log (err);
+        res.status(500).json({message: 'Server Error!1'});
     }
 };

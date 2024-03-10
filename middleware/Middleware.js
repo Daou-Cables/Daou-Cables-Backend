@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const Token = require('../models/Token');
+const rateLimit = require('express-rate-limit');
 
 const requireAuth = async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
@@ -62,4 +63,12 @@ const requireLevelOne = async (req, res, next) => {
     }
 };
 
-module.exports = { requireAuth, requireLevelOne };
+const addQuotaLimiter = rateLimit({
+    windowMs: 24 * 60 * 60 * 1000,
+    max: 2, 
+    message: 'You have exceeded the 2 requests in 24 hours limit!',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+module.exports = { requireAuth, requireLevelOne, addQuotaLimiter };

@@ -13,9 +13,6 @@ const quotaSchema = new mongoose.Schema({
     email:{
         type: String
     },
-    description:{
-        type: String
-    },
     read:{
         type: Boolean,
         default: false
