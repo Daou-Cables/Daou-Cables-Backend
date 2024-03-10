@@ -26,6 +26,7 @@ router.post('/editProduct', requireAuth, upload.fields([
     {name:'ref',maxCount:1},
     {name:'description',maxCount:1}]), adminController.editProduct_post);
 router.post('/readQuota', requireAuth, adminController.readQuota_post);
+router.post('/deleteQuota', requireAuth, adminController.deleteQuota_post);
 
 router.get('/getQuotas', requireAuth, adminController.getQuotas_get);
 
