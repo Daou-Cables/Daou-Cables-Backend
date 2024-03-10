@@ -4,6 +4,7 @@ const Admin = require('../models/Admin');
 const Contact = require('../models/Contact');
 const Media = require('../models/Media');
 const Product = require('../models/Product');
+const Quota = require('../models/Quota');
 const bcrypt = require('bcrypt');
 
 module.exports.addAdmin_post = async (req, res) => {
@@ -254,6 +255,24 @@ module.exports.editProduct_post = async (req, res) => {
         }
         else{
             res.status(404).json({message: 'Product not found!'});
+        }
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.readQuota_post = async (req, res) => {
+    try{
+        const { id } = req.body;
+        const quota = await Quota.findById(id);
+        if(quota){
+            quota.read = true;
+            await quota.save();
+            res.status(200).json(quota);
+        }
+        else{
+            res.status(404).json({message: 'Quota not found!'});
         }
     }
     catch(err){
