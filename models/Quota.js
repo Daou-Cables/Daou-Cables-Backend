@@ -20,3 +20,5 @@ const quotaSchema = new mongoose.Schema({
 });
 
 const Quota = mongoose.model('Quota', quotaSchema);
+
+module.exports = Quota;
