@@ -4,6 +4,7 @@ const Admin = require('../models/Admin');
 const Contact = require('../models/Contact');
 const Media = require('../models/Media');
 const Product = require('../models/Product');
+const Category = require('../models/Category');
 const Quota = require('../models/Quota');
 const bcrypt = require('bcrypt');
 
@@ -162,7 +163,7 @@ module.exports.changeVideo_post = async (req, res) => {
 
 module.exports.addProduct_post = async (req, res) => {
     try{
-        const { name, description, ref } = req.body;
+        const { name, description, ref, category } = req.body;
         const picture = req.files.picture[0].originalname;
         const type = req.files.picture[0].mimetype;
         const file = req.files.picture[0].buffer;
@@ -181,8 +182,16 @@ module.exports.addProduct_post = async (req, res) => {
         };
         const data = await s3Client.send(new PutObjectCommand(params));
         const pictureUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(params.Key)}`;
-        const product = new Product({ name, description, picture: pictureUrl, ref});
+        const cat = await Category.findOne({ name: category });
+        if(!cat){
+            res.status(404).json({message: 'Category not found!'});
+            return;
+        }
+        const product = new Product({ name, description, picture: pictureUrl, ref, category: cat._id});
         await product.save();
+        new_product = await Product.findOne({ ref })
+        cat.products.push(new_product._id);
+        await cat.save();
         res.status(201).json(product);
     }
     catch(err){
@@ -202,6 +211,9 @@ module.exports.deleteProduct_post = async (req, res) => {
                 Key: pictureKey,
             };
             await s3Client.send(new DeleteObjectCommand(deleteParams));
+            cat = await Category.findById(product.category);
+            cat.products = cat.products.filter(p => p.toString() !== product._id.toString());
+            await cat.save();
             await product.deleteOne();
             res.status(200).json({message: 'Product deleted!'});
         }
@@ -296,6 +308,36 @@ module.exports.deleteQuota_post = async (req, res) => {
         res.status(500).json({message: 'Server Error!'});
     }
 };
+
+module.exports.addCategory_post = async (req, res) => {
+    try{
+        const { name } = req.body;
+        const category = new Category({ name });
+        await category.save();
+        res.status(201).json(category);
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
+module.exports.deleteCategory_post = async (req, res) => {
+    try {
+        const { name } = req.body;
+        const category = await Category.findOne({ name });
+        if (category) {
+            await Product.deleteMany({ _id: { $in: category.products } });
+            await category.deleteOne();
+            res.status(200).json({ message: 'Category and associated products deleted!' });
+        } else {
+            res.status(404).json({ message: 'Category not found!' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server Error!' });
+    }
+};
+
 
 module.exports.getQuotas_get = async (req, res) => {
     try{

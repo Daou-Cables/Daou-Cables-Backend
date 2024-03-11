@@ -27,6 +27,8 @@ router.post('/editProduct', requireAuth, upload.fields([
     {name:'description',maxCount:1}]), adminController.editProduct_post);
 router.post('/readQuota', requireAuth, adminController.readQuota_post);
 router.post('/deleteQuota', requireAuth, adminController.deleteQuota_post);
+router.post('/addCategory', requireAuth, adminController.addCategory_post);
+router.post('/deleteCategory', requireAuth, adminController.deleteCategory_post);
 
 router.get('/getQuotas', requireAuth, adminController.getQuotas_get);
 
