@@ -101,3 +101,25 @@ module.exports.refreshToken_post = async (req, res) => {
         return res.status(403).json({message: 'Token Not Received'});
     }
 };
+
+module.exports.logout_post = async (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    if (token) {
+        try {
+            const ARtoken = await Token.findOne({ access_token: token });
+            if (ARtoken) {
+                ARtoken.deleteOne();
+                return res.status(200).json({message: 'Logout Successful'});
+            }
+            else {
+                return res.status(404).json({message: 'Token Not Found'});
+            }
+        }
+        catch (err) {
+            return res.status(500).json({message: 'Server Error'});
+        }
+    }
+    else {
+        return res.status(403).json({message: 'Token Not Received'});
+    }
+};
