@@ -9,6 +9,7 @@ router.post('/addAdmin', requireAuth, requireLevelOne, adminController.addAdmin_
 router.post('/deleteAdmin', requireAuth, requireLevelOne, adminController.deleteAdmin_post);
 router.post('/editContact', requireAuth, requireLevelOne, adminController.editContact_post);
 router.post('/changeBillboard', requireAuth, requireLevelOne, upload.single('picture'), adminController.changeBillboard_post);
+router.post('/changeBillboardMb', requireAuth, requireLevelOne, upload.single('picture'), adminController.changeBillboardMb_post);
 router.post('/changeVideo', requireAuth, requireLevelOne, upload.single('video'), adminController.changeVideo_post);
 
 router.get('/getAdmins', requireAuth, requireLevelOne, adminController.getAdmins_get);

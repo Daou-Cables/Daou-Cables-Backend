@@ -66,6 +66,16 @@ module.exports.getBillboard_get = async (req, res) => {
     }
 };
 
+module.exports.getBillboardMb_get = async (req, res) => {
+    try{
+        const media = await Media.findOne();
+        res.status(200).json(media.billboard_mb);
+    }
+    catch(err){
+        res.status(500).json({message: 'Server Error!'});
+    }
+};
+
 module.exports.getVideo_get = async (req, res) => {
     try{
         const media = await Media.findOne();

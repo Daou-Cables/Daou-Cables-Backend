@@ -10,6 +10,7 @@ router.get('/getCategories', mainController.getCategories_get);
 router.get('/getProduct/:ref', mainController.getProduct_get);
 router.get('/getProductsByCategory/:category', mainController.getProductsByCategory_get);
 router.get('/getBillboard', mainController.getBillboard_get);
+router.get('/getBillboardMb', mainController.getBillboardMb_get);
 router.get('/getVideo', mainController.getVideo_get);
 
 

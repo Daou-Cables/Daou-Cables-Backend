@@ -4,6 +4,9 @@ const mediaSchema = new mongoose.Schema({
     billboard: {
         type: String,
     },
+    billboard_mb: {
+        type: String,
+    },
     video: {
         type: String,
     }

@@ -122,6 +122,44 @@ module.exports.changeBillboard_post = async (req, res) => {
     }
 };
 
+module.exports.changeBillboardMb_post = async (req, res) => {
+    try {
+        const picture = req.file.originalname;
+        const file = req.file.buffer;
+        const type = req.file.mimetype;
+        const media = await Media.findOne();
+        if (media && media.billboard_mb) {
+            const oldPictureUrl = new URL(media.billboard_mb);
+            const oldPictureKey = decodeURIComponent(oldPictureUrl.pathname.substring(1));
+            const deleteParams = {
+                Bucket: process.env.BUCKET,
+                Key: oldPictureKey,
+            };
+            await s3Client.send(new DeleteObjectCommand(deleteParams));
+        }
+        if(type !== 'image/jpeg' && type !== 'image/png'){
+            res.status(400).json({message: 'Invalid file type!'});
+            return;
+        }
+        const date = new Date();
+        const newFileName = bcrypt.hashSync(picture + date.toISOString(), 10);
+        const uploadParams = {
+            Bucket: process.env.BUCKET,
+            Key: newFileName,
+            Body: file,
+            ACL: 'public-read',
+            ContentType: type
+        };
+        await s3Client.send(new PutObjectCommand(uploadParams));
+        const pictureUrl = `https://${uploadParams.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(uploadParams.Key)}`;
+        media.billboard_mb = pictureUrl;
+        await media.save();
+        res.status(200).json(media.billboard_mb);
+    } catch (err) {
+        res.status(500).json({ message: 'Server Error! wennn', err: err });
+    }
+};
+
 module.exports.changeVideo_post = async (req, res) => {
     try{
         const video = req.file.originalname;
